@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No solo grabamos partidos. Conservamos momentos. — Tus Clips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green-dark:#0F3D24;
+  --green-darker:#0A2A19;
+  --green-black:#06170D;
+  --green-light:#4CAF6D;
+  --green-pale:#E4F3E9;
+  --white:#FFFFFF;
+  --gray-dark:#1A1D1B;
+  --gray-mid:#63696A;
+  --gray-line:#E4E7E4;
+  --black:#0B0C0B;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;color:var(--gray-dark);background:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif;}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+section{padding:120px 0;position:relative;}
+@media(max-width:760px){ section{padding:80px 0;} .wrap{padding:0 22px;} }
+
+/* NAV (consistente con la Home) */
+nav{position:fixed;top:0;left:0;right:0;z-index:60;padding:22px 0;transition:all .35s ease;}
+nav.solid{padding:14px 0;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--gray-line);}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;color:var(--white);transition:color .35s ease;}
+nav.solid .brand{color:var(--green-dark);}
+.brand svg{width:24px;height:24px;}
+.nav-links{display:flex;gap:32px;font-size:14.5px;font-weight:500;}
+.nav-links a{color:rgba(255,255,255,.88);transition:color .3s;}
+nav.solid .nav-links a{color:var(--gray-dark);}
+@media(max-width:860px){.nav-links{display:none;}}
+.nav-actions{display:flex;gap:12px;}
+.btn{font-weight:600;font-size:14px;padding:10px 22px;border-radius:100px;border:1.5px solid transparent;transition:transform .25s ease, background .25s ease;display:inline-flex;align-items:center;gap:8px;}
+.btn:hover{transform:translateY(-2px);}
+.btn-ghost{border-color:rgba(255,255,255,.55);color:var(--white);}
+nav.solid .btn-ghost{border-color:var(--gray-line);color:var(--gray-dark);}
+.btn-solid{background:var(--green-light);color:var(--green-darker);}
+.btn-solid:hover{background:#3fa25e;box-shadow:0 10px 24px -8px rgba(76,175,109,.55);}
+#navUserName{color:rgba(255,255,255,.9);transition:color .35s ease;}
+nav.solid #navUserName{color:var(--gray-dark);}
+
+/* AUTH MODAL */
+.auth-overlay{position:fixed;inset:0;background:rgba(10,20,15,.55);backdrop-filter:blur(3px);z-index:220;display:none;align-items:center;justify-content:center;padding:20px;}
+.auth-overlay.open{display:flex;}
+.auth-box{background:#fff;border-radius:20px;max-width:400px;width:100%;padding:32px;position:relative;animation:authIn .25s ease;}
+@keyframes authIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.auth-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:#F4F6F4;display:flex;align-items:center;justify-content:center;transition:.2s;cursor:pointer;}
+.auth-close:hover{background:var(--gray-line);}
+.auth-close svg{width:15px;height:15px;}
+.auth-box h3{font-size:19px;font-weight:600;margin-bottom:6px;padding-right:26px;color:var(--gray-dark);}
+.auth-sub{font-size:13px;color:var(--gray-mid);margin-bottom:22px;}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-size:12px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px;}
+.auth-field input{width:100%;border:1.5px solid var(--gray-line);border-radius:10px;padding:11px 13px;font-size:14.5px;font-family:'Inter',sans-serif;transition:border-color .2s;color:var(--gray-dark);}
+.auth-field input:focus{outline:none;border-color:var(--green-light);}
+.auth-error{display:none;font-size:13px;color:#c2453c;background:#FCEBEA;border-radius:9px;padding:9px 12px;margin-bottom:14px;line-height:1.4;}
+.auth-submit{width:100%;background:var(--green-dark);color:#fff;border:none;padding:12px;border-radius:10px;font-weight:600;font-size:14.5px;cursor:pointer;transition:background .2s, transform .2s;}
+.auth-submit:hover{background:var(--green-darker);transform:translateY(-1px);}
+.auth-submit:disabled{opacity:.6;cursor:default;transform:none;}
+.auth-switch{text-align:center;font-size:13px;color:var(--gray-mid);margin-top:16px;}
+.auth-switch a{color:var(--green-dark);font-weight:600;cursor:pointer;}
+
+/* HERO */
+.hero{min-height:100vh;position:relative;display:flex;align-items:flex-end;overflow:hidden;}
+.hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(6,23,13,.35) 0%, rgba(6,23,13,.55) 55%, rgba(6,23,13,.94) 100%);}
+.hero-content{position:relative;z-index:2;padding:0 0 100px;width:100%;}
+.hero h1{color:var(--white);font-size:clamp(32px,5.6vw,60px);line-height:1.14;font-weight:600;letter-spacing:-.01em;max-width:720px;}
+.hero .lead{color:rgba(255,255,255,.72);font-size:17px;max-width:480px;margin:22px 0 36px;line-height:1.6;}
+
+/* SHARED */
+.eyebrow-sm{font-size:13px;font-weight:600;color:var(--green-dark);letter-spacing:.05em;text-transform:uppercase;margin-bottom:14px;}
+.section-title{font-size:clamp(26px,3.4vw,40px);font-weight:600;letter-spacing:-.01em;line-height:1.18;}
+.dark .eyebrow-sm{color:var(--green-light);}
+.dark .section-title{color:var(--white);}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease, transform .7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* HISTORIA */
+.historia-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:center;margin-top:20px;}
+@media(max-width:860px){.historia-grid{grid-template-columns:1fr;gap:44px;}}
+.historia-lines p{font-size:16.5px;line-height:1.5;color:var(--gray-mid);margin-bottom:6px;}
+.historia-lines p.strong{color:var(--gray-dark);font-weight:600;font-size:19px;margin-top:18px;}
+.historia-lines p.big{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600;color:var(--green-dark);margin-top:22px;}
+
+/* CARDS GRID (problema) */
+.problema{background:var(--green-darker);color:var(--white);}
+.cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:56px;}
+@media(max-width:960px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.cards-grid{grid-template-columns:1fr;}}
+.pcard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:26px 20px;text-align:center;}
+.pcard .emoji{font-size:30px;margin-bottom:16px;}
+.pcard p{font-size:14.5px;color:rgba(255,255,255,.8);line-height:1.5;}
+.quote-big{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:clamp(22px,3.4vw,34px);font-weight:600;color:var(--white);margin-top:70px;line-height:1.35;}
+.quote-big span{color:var(--green-light);}
+
+/* SOLUCION */
+.solucion-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 32px;margin-top:34px;max-width:620px;}
+@media(max-width:600px){.solucion-list{grid-template-columns:1fr;}}
+.solucion-list li{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;}
+.solucion-list svg{width:18px;height:18px;color:var(--green-dark);flex-shrink:0;}
+.flow-row{display:flex;align-items:center;justify-content:space-between;margin-top:80px;gap:8px;}
+@media(max-width:860px){.flow-row{flex-direction:column;align-items:flex-start;}}
+.flow-node{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;flex:1;}
+.flow-node .ic{width:58px;height:58px;border-radius:16px;background:var(--green-pale);color:var(--green-dark);display:flex;align-items:center;justify-content:center;}
+.flow-node .ic svg{width:26px;height:26px;}
+.flow-node span{font-size:13.5px;font-weight:600;}
+.flow-arrow{color:var(--gray-line);flex-shrink:0;}
+.flow-arrow svg{width:26px;height:26px;}
+@media(max-width:860px){.flow-arrow svg{transform:rotate(90deg);margin-left:29px;}}
+
+/* TIMELINES */
+.tl-wrap{margin-top:56px;position:relative;padding-left:34px;}
+.tl-wrap::before{content:'';position:absolute;left:11px;top:6px;bottom:6px;width:1.5px;background:var(--gray-line);}
+.dark .tl-wrap::before{background:rgba(255,255,255,.18);}
+.tl-item{position:relative;padding-bottom:38px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item::before{content:'';position:absolute;left:-34px;top:2px;width:23px;height:23px;border-radius:50%;background:var(--white);border:2px solid var(--green-dark);}
+.dark .tl-item::before{background:var(--green-darker);border-color:var(--green-light);}
+.tl-item h4{font-size:16px;font-weight:600;margin-bottom:4px;}
+.dark .tl-item h4{color:var(--white);}
+.tl-item p{font-size:14px;color:var(--gray-mid);line-height:1.5;}
+.dark .tl-item p{color:rgba(255,255,255,.62);}
+
+/* IA SECTION */
+.ia-section{background:linear-gradient(180deg, var(--green-black), #08190F 70%, var(--green-darker));}
+.ia-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:56px;}
+@media(max-width:960px){.ia-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.ia-grid{grid-template-columns:1fr;}}
+.ia-card{
+  background:rgba(255,255,255,.04);border:1px solid rgba(76,175,109,.28);border-radius:16px;
+  padding:22px 18px;transition:transform .3s ease, border-color .3s ease, background .3s ease;
+}
+.ia-card:hover{transform:translateY(-4px);border-color:var(--green-light);background:rgba(76,175,109,.08);}
+.ia-card .emoji{font-size:24px;margin-bottom:12px;}
+.ia-card p{font-size:13.5px;font-weight:500;color:rgba(255,255,255,.85);}
+.ia-note{margin-top:30px;font-size:13px;color:rgba(255,255,255,.5);text-align:center;}
+
+/* CTA FINAL */
+.cta-final{text-align:center;padding:140px 0;}
+.cta-final h2{font-size:clamp(26px,4vw,44px);font-weight:600;max-width:720px;margin:0 auto 18px;line-height:1.25;}
+.cta-final p{color:var(--gray-mid);font-size:16.5px;max-width:520px;margin:0 auto 40px;}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-lg{padding:14px 28px;font-size:15px;border-radius:100px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:transform .25s ease, box-shadow .25s ease;}
+.btn-lg:hover{transform:translateY(-2px);}
+.btn-dark{background:var(--green-dark);color:#fff;}
+.btn-dark:hover{box-shadow:0 14px 28px -10px rgba(15,61,36,.5);}
+.btn-outline{border:1.5px solid var(--gray-line);color:var(--gray-dark);}
+.btn-outline:hover{border-color:var(--green-light);background:var(--green-pale);}
+
+footer{padding:48px 0;border-top:1px solid var(--gray-line);}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px;}
+.footer-inner .brand{color:var(--green-dark);font-size:16px;}
+.footer-links{display:flex;gap:26px;font-size:13.5px;color:var(--gray-mid);font-weight:500;}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="wrap nav-inner">
+    <a href="preview-home.html" class="brand">
+      <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2.4"/><path d="M15 13L15 27L27 20Z" fill="currentColor"/></svg>
+      tus<span style="color:#4CAF6D">clips</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="preview-home.html">Inicio</a></li>
+      <li><a href="preview-home.html#como-funciona">Cómo funciona</a></li>
+      <li><a href="#duenio">Precios</a></li>
+      <li><a href="#cta">Contacto</a></li>
+    </ul>
+    <div class="nav-actions" id="navGuestActions">
+      <a class="btn btn-ghost" onclick="openAuthModal('login')">Iniciar sesión</a>
+      <a class="btn btn-solid" onclick="openAuthModal('register')">Registrarse</a>
+    </div>
+    <div class="nav-actions" id="navUserActions" style="display:none;">
+      <span style="font-size:14px;font-weight:600;" id="navUserName"></span>
+      <a class="btn btn-ghost" onclick="logout()">Cerrar sesión</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <video autoplay muted loop playsinline poster="https://assets.mixkit.co/videos/43485/43485-thumb-360-0.jpg" id="heroVideo">
+    <source src="https://assets.mixkit.co/videos/43485/43485-360.mp4" type="video/mp4">
+  </video>
+  <div class="wrap hero-content">
+    <h1 class="reveal in">No solo grabamos partidos.<br>Conservamos momentos.</h1>
+    <p class="lead reveal in">Cada gol, cada caño, cada atajada y cada jugada merece volver a verse.</p>
+    <a href="#solucion" class="btn btn-solid reveal in">Conocer cómo funciona</a>
+  </div>
+</header>
+
+<!-- HISTORIA -->
+<section id="historia">
+  <div class="wrap historia-grid">
+    <svg class="reveal" viewBox="0 0 420 420" fill="none" style="width:100%;max-width:420px;justify-self:center;">
+      <rect width="420" height="420" rx="26" fill="#E4F3E9"/>
+      <rect x="30" y="250" width="360" height="8" rx="4" fill="#0F3D24"/>
+      <circle cx="140" cy="200" r="60" fill="#4CAF6D" opacity=".35"/>
+      <circle cx="290" cy="180" r="40" fill="#0F3D24" opacity=".12"/>
+      <!-- two figures leaning on the fence -->
+      <g fill="#0F3D24">
+        <rect x="150" y="170" width="16" height="80" rx="8"/>
+        <circle cx="158" cy="158" r="16"/>
+        <rect x="180" y="180" width="16" height="70" rx="8"/>
+        <circle cx="188" cy="168" r="16"/>
+      </g>
+      <rect x="30" y="248" width="360" height="4" fill="#0F3D24" opacity=".5"/>
+      <circle cx="330" cy="90" r="26" fill="#F2B84B" opacity=".8"/>
+    </svg>
+
+    <div class="reveal">
+      <div class="eyebrow-sm">Nuestra historia</div>
+      <h2 class="section-title" style="margin-bottom:26px;">Todo comenzó jugando al fútbol.</h2>
+      <div class="historia-lines">
+        <p>Somos dos hermanos apasionados por el fútbol.</p>
+        <p>Como cualquier persona que juega con amigos o compite los fines de semana, nos dimos cuenta de algo muy simple.</p>
+        <p style="margin-top:14px;">Jugamos cientos de partidos. Hacemos goles. Erramos goles.</p>
+        <p>Metemos algún caño. Nos hacen un caño. Discutimos una jugada. Nos reímos durante el tercer tiempo.</p>
+        <p class="strong">Pero cuando termina el partido...</p>
+        <p class="big">No queda absolutamente nada.</p>
+        <p style="margin-top:18px;">Ni un recuerdo. Ni un video. Ni una sola imagen.</p>
+        <p style="margin-top:14px;">Incluso uno de nosotros juega en un equipo de fútbol, y muchas veces pensamos lo útil que sería volver a mirar los entrenamientos: analizar una jugada, corregir movimientos, preparar tácticas, o simplemente guardar un gol importante.</p>
+        <p class="strong">Ahí nació esta idea.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="problema dark">
+  <div class="wrap">
+    <div class="reveal" style="max-width:640px;">
+      <div class="eyebrow-sm">El problema</div>
+      <h2 class="section-title">El fútbol amateur evolucionó… menos la forma de recordarlo.</h2>
+    </div>
+    <div class="cards-grid" id="problemaCards"></div>
+    <p class="quote-big reveal">Los mejores momentos duran segundos.<br><span>Los recuerdos deberían durar para siempre.</span></p>
+  </div>
+</section>
+
+<!-- SOLUCION -->
+<section id="solucion">
+  <div class="wrap">
+    <div class="reveal" style="max-width:640px;">
+      <div class="eyebrow-sm">La solución</div>
+      <h2 class="section-title">Ahí es donde aparece nuestra plataforma.</h2>
+      <p style="color:var(--gray-mid);font-size:16px;line-height:1.6;margin-top:18px;">
+        Instalamos cámaras inteligentes en complejos deportivos. Las cámaras graban automáticamente cada partido, todo el contenido se procesa y se sube a la plataforma. En cuestión de minutos, los jugadores ya pueden acceder al partido completo y:
+      </p>
+    </div>
+
+    <ul class="solucion-list reveal" id="solucionList"></ul>
+
+    <div class="flow-row reveal" id="flowRow"></div>
+  </div>
+</section>
+
+<!-- DUEÑO DEL COMPLEJO -->
+<section id="duenio" style="background:var(--green-pale);">
+  <div class="wrap">
+    <div class="reveal" style="max-width:640px;">
+      <div class="eyebrow-sm">Para el dueño del complejo</div>
+      <h2 class="section-title">De la instalación a la suscripción, sin complicaciones.</h2>
+    </div>
+    <div class="tl-wrap reveal" id="duenioTimeline"></div>
+    <p class="reveal" style="margin-top:36px;font-size:15.5px;color:var(--gray-dark);font-weight:500;max-width:600px;">
+      No vendemos solamente cámaras. Vendemos una experiencia completamente nueva para el fútbol amateur — la plataforma es el verdadero valor del servicio.
+    </p>
+  </div>
+</section>
+
+<!-- JUGADORES -->
+<section>
+  <div class="wrap">
+    <div class="reveal" style="max-width:640px;">
+      <div class="eyebrow-sm">Para los jugadores</div>
+      <h2 class="section-title">De la cancha a tu clip, sin fricción.</h2>
+    </div>
+    <div class="tl-wrap reveal" id="jugadoresTimeline"></div>
+  </div>
+</section>
+
+<!-- IA -->
+<section class="ia-section dark">
+  <div class="wrap">
+    <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto;">
+      <div class="eyebrow-sm">El futuro con IA</div>
+      <h2 class="section-title">Esto recién empieza.</h2>
+      <p style="color:rgba(255,255,255,.65);font-size:16px;margin-top:16px;">La inteligencia artificial cambiará la forma de vivir el fútbol amateur.</p>
+    </div>
+    <div class="ia-grid" id="iaGrid"></div>
+    <p class="ia-note">Algunas de estas funciones estarán disponibles en futuras versiones de la plataforma.</p>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta" class="cta-final">
+  <div class="wrap">
+    <h2 class="reveal">¿Te imaginás salir de la cancha y tener tu partido listo para ver?</h2>
+    <p class="reveal">Queremos transformar la experiencia del fútbol amateur utilizando tecnología e inteligencia artificial.</p>
+    <div class="cta-actions reveal">
+      <a class="btn-lg btn-dark" href="#duenio">Solicitar instalación</a>
+      <a class="btn-lg btn-outline" href="#" target="_blank" rel="noopener">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.42 1.32 4.9L2 22l5.34-1.4a9.9 9.9 0 004.7 1.2h.01c5.46 0 9.9-4.45 9.9-9.9C21.96 6.45 17.5 2 12.04 2zm5.8 14.14c-.24.68-1.4 1.3-1.93 1.36-.5.06-1.1.09-1.78-.11-.4-.13-.93-.3-1.6-.6-2.8-1.21-4.62-4.02-4.76-4.2-.14-.19-1.14-1.52-1.14-2.9 0-1.37.72-2.04.97-2.32.26-.28.56-.35.75-.35h.53c.17 0 .4-.06.62.48.24.58.8 2 .87 2.14.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.57.16.28.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.24 1.38.28.14.44.12.6-.07.17-.19.7-.82.89-1.1.19-.28.38-.23.63-.14.26.09 1.63.77 1.9.91.28.14.46.21.53.33.07.12.07.68-.17 1.36z"/></svg>
+        Hablar por WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <a href="preview-home.html" class="brand">tus<span style="color:#4CAF6D">clips</span></a>
+    <div class="footer-links">
+      <a href="#">Términos</a>
+      <a href="#">Privacidad</a>
+      <a href="#">WhatsApp</a>
+      <a href="#">Instagram</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const iconArrow = '<path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+const iconCheck = '<path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+
+/* PROBLEMA cards */
+const problema = [
+  {e:'⚽', t:'Hacés un gol increíble.'},
+  {e:'💥', t:'Sale una jugada espectacular.'},
+  {e:'😂', t:'Le tirás un caño a tu mejor amigo.'},
+  {e:'🥅', t:'El arquero hace una atajada imposible.'},
+  {e:'📈', t:'El entrenador quiere analizar una práctica.'},
+];
+document.getElementById('problemaCards').innerHTML = problema.map(p=>`
+  <div class="pcard reveal"><div class="emoji">${p.e}</div><p>${p.t}</p></div>
+`).join('') + `<p style="grid-column:1/-1;text-align:center;margin-top:8px;color:rgba(255,255,255,.55);font-size:14px;">Y cuando termina el partido… todo desaparece.</p>`;
+
+/* SOLUCION list */
+const soluciones = ['Ver el partido completo','Editar el video','Crear clips','Descargar sus mejores jugadas','Compartirlas con amigos','Guardar recuerdos','Analizar entrenamientos'];
+document.getElementById('solucionList').innerHTML = soluciones.map(s=>`<li><svg viewBox="0 0 24 24">${iconCheck}</svg>${s}</li>`).join('');
+
+/* FLOW row */
+const flow = [
+  {label:'Cancha', ic:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'},
+  {label:'Cámaras', ic:'<rect x="3" y="7" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16 10l5-3v10l-5-3" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/>'},
+  {label:'Procesamiento', ic:'<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>'},
+  {label:'Plataforma', ic:'<rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'},
+  {label:'Video listo', ic:'<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M10 9l5 3-5 3z" fill="currentColor"/>'},
+];
+document.getElementById('flowRow').innerHTML = flow.map((f,i)=>`
+  <div class="flow-node"><div class="ic"><svg viewBox="0 0 24 24">${f.ic}</svg></div><span>${f.label}</span></div>
+  ${i<flow.length-1?`<div class="flow-arrow"><svg viewBox="0 0 24 24">${iconArrow}</svg></div>`:''}
+`).join('');
+
+/* TIMELINES */
+const duenio = [
+  {t:'Elegís el tipo de instalación', d:'Definimos juntos qué necesita tu complejo.'},
+  {t:'Seleccionás la cantidad de cámaras', d:'Una o dos cámaras por cancha, según tu preferencia.'},
+  {t:'Elegís la calidad', d:'Básica, media o premium, cada una con distinto costo.'},
+  {t:'Realizamos la instalación completa', d:'Nuestro equipo se encarga de todo el proceso.'},
+  {t:'El complejo empieza a usar el servicio', d:'Tus jugadores ya pueden acceder a sus partidos.'},
+  {t:'Pagás una suscripción mensual', d:'Por el uso continuo de la plataforma.'},
+];
+document.getElementById('duenioTimeline').innerHTML = duenio.map(s=>`<div class="tl-item"><h4>${s.t}</h4><p>${s.d}</p></div>`).join('');
+
+const jugadores = [
+  {t:'Reservan la cancha', d:'Como siempre lo hacen.'},
+  {t:'Juegan el partido normalmente', d:'Las cámaras del complejo graban todo.'},
+  {t:'Adquieren el video si quieren conservarlo', d:'Por un pequeño costo adicional.'},
+  {t:'Reciben un código único por correo', d:'Al finalizar el encuentro.'},
+  {t:'Ingresan a la plataforma', d:'Desde cualquier dispositivo.'},
+  {t:'Inician sesión o ingresan el código', d:'Sin cuenta obligatoria.'},
+  {t:'Acceden al partido completo', d:'De forma inmediata.'},
+  {t:'Editan los mejores momentos', d:'Con el editor integrado.'},
+  {t:'Crean clips personalizados', d:'En segundos.'},
+  {t:'Los descargan o comparten', d:'Con su equipo y amigos.'},
+];
+document.getElementById('jugadoresTimeline').innerHTML = jugadores.map(s=>`<div class="tl-item"><h4>${s.t}</h4><p>${s.d}</p></div>`).join('');
+
+/* IA grid */
+const ia = [
+  {e:'⚽',t:'Detección automática de goles'},
+  {e:'🎯',t:'Detección de jugadas importantes'},
+  {e:'🔥',t:'Creación automática de clips'},
+  {e:'🥅',t:'Resumen del partido'},
+  {e:'📊',t:'Estadísticas de posesión'},
+  {e:'📈',t:'Mapas de calor'},
+  {e:'🏃',t:'Distancias recorridas'},
+  {e:'🎥',t:'Jugadas destacadas automáticas'},
+  {e:'🤖',t:'Resúmenes inteligentes'},
+  {e:'📹',t:'Edición automática del mejor video'},
+];
+document.getElementById('iaGrid').innerHTML = ia.map(c=>`<div class="ia-card reveal"><div class="emoji">${c.e}</div><p>${c.t}</p></div>`).join('');
+
+/* nav solid on scroll */
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', ()=> nav.classList.toggle('solid', window.scrollY>40));
+
+/* slow-motion feel on hero video */
+const hv = document.getElementById('heroVideo');
+hv.addEventListener('loadedmetadata', ()=>{ hv.playbackRate = 0.6; });
+
+/* scroll reveal */
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{ if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('in'), (i%5)*70); } });
+}, {threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+<div class="auth-overlay" id="authModalOverlay" onclick="if(event.target.id==='authModalOverlay') closeAuthModal()">
+  <div class="auth-box">
+    <div class="auth-close" onclick="closeAuthModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </div>
+    <h3 id="authModalTitle">Iniciar sesión</h3>
+    <p class="auth-sub">Guardá tus partidos y clips en un solo lugar. Es opcional, pero te va a ahorrar tiempo.</p>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-field"><label>Mail</label><input type="email" id="authEmail" placeholder="tu@mail.com" autocomplete="email"></div>
+    <div class="auth-field"><label>Contraseña</label><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="auth-submit" id="authSubmitBtn" onclick="submitAuth()">Iniciar sesión</button>
+    <div class="auth-switch" id="authSwitchText">¿No tenés cuenta? <a onclick="authSwitchMode()">Registrate</a></div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient('https://jwzsjprwscinxonpdbfw.supabase.co', 'sb_publishable_n5Tm7gI91-exEStWoVZftg_TeSegW43');
+  window.tcSupabase = supabase;
+  const $ = (id) => document.getElementById(id);
+
+  window.openAuthModal = function(mode){
+    $('authModalOverlay').dataset.mode = mode;
+    $('authModalTitle').textContent = mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
+    $('authSubmitBtn').textContent = mode === 'login' ? 'Iniciar sesión' : 'Registrarme';
+    $('authSwitchText').innerHTML = mode === 'login' ? '¿No tenés cuenta? <a onclick="authSwitchMode()">Registrate</a>' : '¿Ya tenés cuenta? <a onclick="authSwitchMode()">Iniciá sesión</a>';
+    $('authError').style.display = 'none'; $('authEmail').value=''; $('authPassword').value='';
+    $('authModalOverlay').classList.add('open');
+  };
+  window.closeAuthModal = function(){ $('authModalOverlay').classList.remove('open'); };
+  window.authSwitchMode = function(){ window.openAuthModal($('authModalOverlay').dataset.mode === 'login' ? 'register' : 'login'); };
+
+  function translateAuthError(msg){
+    if(/already registered|already exists/i.test(msg)) return 'Ese mail ya tiene una cuenta creada. Probá iniciar sesión.';
+    if(/invalid login credentials/i.test(msg)) return 'Mail o contraseña incorrectos.';
+    if(/password should be at least/i.test(msg)) return 'La contraseña debe tener al menos 6 caracteres.';
+    if(/unable to validate email/i.test(msg)) return 'Ese mail no parece válido.';
+    return msg;
+  }
+
+  window.submitAuth = async function(){
+    const mode = $('authModalOverlay').dataset.mode;
+    const email = $('authEmail').value.trim();
+    const password = $('authPassword').value;
+    const errEl = $('authError');
+    errEl.style.display='none'; errEl.style.color='#c2453c'; errEl.style.background='#FCEBEA';
+    if(!email || !password){ errEl.textContent='Completá mail y contraseña.'; errEl.style.display='block'; return; }
+    const btn = $('authSubmitBtn');
+    btn.disabled = true; btn.textContent='Un momento…';
+    const { data, error } = mode === 'login'
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+    btn.disabled = false; btn.textContent = mode === 'login' ? 'Iniciar sesión' : 'Registrarme';
+    if(error){ errEl.textContent = translateAuthError(error.message); errEl.style.display='block'; return; }
+    if(mode === 'register' && !data.session){
+      errEl.style.color='#0F3D24'; errEl.style.background='#E4F3E9';
+      errEl.textContent='Cuenta creada. Revisá tu mail para confirmarla antes de iniciar sesión.';
+      errEl.style.display='block'; return;
+    }
+    closeAuthModal(); refreshAuthUI();
+  };
+
+  window.logout = async function(){ await supabase.auth.signOut(); refreshAuthUI(); };
+
+  async function refreshAuthUI(){
+    const { data: { session } } = await supabase.auth.getSession();
+    const guest = document.getElementById('navGuestActions');
+    const user = document.getElementById('navUserActions');
+    if(!guest || !user) return;
+    if(session){
+      guest.style.display='none'; user.style.display='flex';
+      const nameEl = document.getElementById('navUserName');
+      if(nameEl) nameEl.textContent = session.user.email.split('@')[0];
+    } else {
+      guest.style.display='flex'; user.style.display='none';
+    }
+  }
+  supabase.auth.onAuthStateChange(() => refreshAuthUI());
+  refreshAuthUI();
+</script>
+</body>
+</html>
