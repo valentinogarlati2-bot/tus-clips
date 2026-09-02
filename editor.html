@@ -302,8 +302,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
     Volver
   </a>
   <div class="topbar-title">
-    <div class="complex">La Morocha</div>
-    <div class="court">Cancha 1</div>
+    <div class="complex" id="topbarComplejo">La Morocha</div>
+    <div class="court" id="topbarCancha">Cancha 1</div>
   </div>
   <div class="topbar-actions">
     <button class="tb-btn" onclick="toast('Enlace de partido copiado')">
@@ -323,6 +323,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
   <!-- LEFT: PLAYER + TIMELINE -->
   <div>
     <div class="card">
+      <div id="codigoBanner" style="display:none;align-items:center;gap:8px;font-size:13.5px;font-weight:600;padding:10px 16px;border-radius:11px;margin-bottom:14px;"></div>
       <div class="player-wrap" id="playerWrap">
         <video id="video" poster="https://assets.mixkit.co/videos/43499/43499-thumb-360-0.jpg" preload="metadata">
           <source src="https://assets.mixkit.co/videos/43499/43499-360.mp4" type="video/mp4">
@@ -447,14 +448,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
   <div class="panel-col">
     <div class="card panel-card">
       <h3>Información del partido</h3>
-      <div class="info-row"><span>Complejo</span><span>La Morocha</span></div>
-      <div class="info-row"><span>Cancha</span><span>Cancha 1</span></div>
-      <div class="info-row"><span>Fecha</span><span>15 jul 2026</span></div>
-      <div class="info-row"><span>Hora</span><span>21:00</span></div>
-      <div class="info-row"><span>Duración</span><span>1h 32m</span></div>
-      <div class="info-row"><span>Equipos</span><span>Azules vs Rojos</span></div>
-      <div class="info-row"><span>Marcador</span><span class="score">5 – 4</span></div>
-      <div class="info-row"><span>Destacado</span><span>Juan Pérez</span></div>
+      <div class="info-row"><span>Complejo</span><span id="infoComplejo">La Morocha</span></div>
+      <div class="info-row"><span>Cancha</span><span id="infoCancha">Cancha 1</span></div>
+      <div class="info-row"><span>Fecha</span><span id="infoFecha">15 jul 2026</span></div>
+      <div class="info-row"><span>Hora</span><span id="infoHora">21:00</span></div>
+      <div class="info-row"><span>Duración</span><span id="infoDuracion">1h 32m</span></div>
+      <div class="info-row"><span>Equipos</span><span id="infoEquipos">Azules vs Rojos</span></div>
+      <div class="info-row"><span>Marcador</span><span class="score" id="infoMarcador">5 – 4</span></div>
+      <div class="info-row"><span>Destacado</span><span id="infoDestacado">Juan Pérez</span></div>
     </div>
 
     <div class="card panel-card">
@@ -803,6 +804,76 @@ window.addEventListener('keydown', (e)=>{
 });
 
 window.addEventListener('resize', ()=>{ if(duration) buildTimeline(); });
+</script>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  const supabase = createClient(
+    'https://jwzsjprwscinxonpdbfw.supabase.co',
+    'sb_publishable_n5Tm7gI91-exEStWoVZftg_TeSegW43'
+  );
+
+  function fmtFecha(fechaISO){
+    const [y,m,d] = fechaISO.split('-');
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return `${parseInt(d)} ${meses[parseInt(m)-1]} ${y}`;
+  }
+  function fmtHora(horaISO){ return horaISO.slice(0,5); }
+  function fmtDuracion(min){
+    if(!min) return '—';
+    const h = Math.floor(min/60), m = min%60;
+    return (h>0 ? h+'h ' : '')+m+'m';
+  }
+
+  async function cargarPartidoPorCodigo(codigo){
+    const banner = document.getElementById('codigoBanner');
+    const { data, error } = await supabase.rpc('buscar_partido_por_codigo', { codigo });
+    if(error || !data || data.length===0){
+      if(banner){
+        banner.style.display='flex';
+        banner.style.background='#FCEBEA';
+        banner.style.color='#c2453c';
+        banner.textContent = 'No encontramos ningún partido con ese código, o ya venció. Mostrando el partido de demostración.';
+      }
+      return;
+    }
+    const p = data[0];
+
+    // Video real
+    const source = document.querySelector('#video source');
+    if(p.video_url){
+      source.src = p.video_url;
+      document.getElementById('video').load();
+    }
+
+    // Topbar
+    document.getElementById('topbarComplejo').textContent = p.complejo_nombre || '—';
+    document.getElementById('topbarCancha').textContent = p.cancha_nombre || '—';
+
+    // Panel de info
+    document.getElementById('infoComplejo').textContent = p.complejo_nombre || '—';
+    document.getElementById('infoCancha').textContent = p.cancha_nombre || '—';
+    document.getElementById('infoFecha').textContent = p.fecha ? fmtFecha(p.fecha) : '—';
+    document.getElementById('infoHora').textContent = p.hora_inicio ? fmtHora(p.hora_inicio) : '—';
+    document.getElementById('infoDuracion').textContent = fmtDuracion(p.duracion_minutos);
+    document.getElementById('infoEquipos').textContent = (p.equipo_a && p.equipo_b) ? `${p.equipo_a} vs ${p.equipo_b}` : '—';
+    document.getElementById('infoMarcador').textContent = (p.marcador_a!=null && p.marcador_b!=null) ? `${p.marcador_a} – ${p.marcador_b}` : '—';
+    document.getElementById('infoDestacado').textContent = p.jugador_destacado || '—';
+
+    if(banner){
+      banner.style.display='flex';
+      banner.style.background='#E4F3E9';
+      banner.style.color='#0F3D24';
+      banner.textContent = 'Partido real cargado desde la base de datos con el código '+codigo.toUpperCase()+'.';
+      setTimeout(()=>{ banner.style.display='none'; }, 5000);
+    }
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const codigo = params.get('codigo');
+  if(codigo){
+    cargarPartidoPorCodigo(codigo);
+  }
 </script>
 </body>
 </html>
