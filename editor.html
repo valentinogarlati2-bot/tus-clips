@@ -89,7 +89,13 @@ a{color:inherit;text-decoration:none;}
 .center-play button:hover{transform:scale(1.08);background:rgba(255,255,255,.22);}
 .center-play svg{width:24px;height:24px;margin-left:3px;}
 
-.controls-bar{position:absolute;left:0;right:0;bottom:0;padding:8px 14px 12px;background:linear-gradient(0deg, rgba(0,0,0,.72), transparent);color:#fff;}
+.controls-bar{position:absolute;left:0;right:0;bottom:0;padding:8px 14px 12px;background:linear-gradient(0deg, rgba(0,0,0,.72), transparent);color:#fff;transition:opacity .35s ease;}
+.record-overlay{transition:opacity .35s ease;}
+.player-wrap.controls-hidden .player-overlay-top,
+.player-wrap.controls-hidden .controls-bar,
+.player-wrap.controls-hidden .record-overlay{
+  opacity:0;pointer-events:none;
+}
 .progress-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
 .progress-track{position:relative;flex:1;height:5px;border-radius:4px;background:rgba(255,255,255,.28);cursor:pointer;}
 .progress-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;background:var(--green-light);width:0%;}
@@ -591,8 +597,23 @@ let duration = 0;
 
 function togglePlay(){ if(video.paused){ video.play(); } else { video.pause(); } }
 playBtn.addEventListener('click', togglePlay);
-video.addEventListener('play', ()=>{ playIcon.innerHTML='<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'; });
-video.addEventListener('pause', ()=>{ playIcon.innerHTML='<path d="M8 5v14l11-7z"/>'; });
+
+let hideControlsTimeout = null;
+function showPlayerControls(){
+  const pw = document.getElementById('playerWrap');
+  pw.classList.remove('controls-hidden');
+  clearTimeout(hideControlsTimeout);
+  if(!video.paused && !recording){
+    hideControlsTimeout = setTimeout(()=>{ pw.classList.add('controls-hidden'); }, 3000);
+  }
+}
+
+video.addEventListener('play', ()=>{ playIcon.innerHTML='<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'; showPlayerControls(); });
+video.addEventListener('pause', ()=>{
+  playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+  document.getElementById('playerWrap').classList.remove('controls-hidden');
+  clearTimeout(hideControlsTimeout);
+});
 video.addEventListener('loadedmetadata', ()=>{ duration = video.duration; video.volume = 0.8; actualizarMiniaturaDesdeVideo(); });
 video.addEventListener('error', ()=>{
   if(video.hasAttribute('crossorigin')){
@@ -653,6 +674,7 @@ document.getElementById('zoomInBtn').addEventListener('click', ()=> setZoom(zoom
 document.getElementById('zoomOutBtn').addEventListener('click', ()=> setZoom(zoomScale-0.4));
 document.getElementById('zoomResetBtn').addEventListener('click', ()=> setZoom(1));
 playerWrap.addEventListener('wheel', (e)=>{ e.preventDefault(); setZoom(zoomScale - e.deltaY*0.0015); }, {passive:false});
+playerWrap.addEventListener('pointerdown', showPlayerControls);
 playerWrap.addEventListener('touchstart', (e)=>{
   if(e.touches.length===2){
     pinchStartDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
@@ -677,6 +699,7 @@ playerWrap.addEventListener('touchend', ()=>{ dragging=false; });
 let lastTapTs=0;
 video.addEventListener('click', ()=>{
   const now=Date.now();
+  showPlayerControls();
   if(now-lastTapTs<320){ setZoom(1); } else { togglePlay(); }
   lastTapTs=now;
 });
@@ -720,11 +743,13 @@ async function toggleRecordClip(){
     btn.classList.add('is-recording');
     overlayText.textContent='Grabando… tocá para detener';
     timerEl.style.display='block';
+    showPlayerControls();
     recordTimerInterval = setInterval(()=>{ timerEl.textContent = fmtTimer((Date.now()-recordStartTs)/1000); }, 250);
   } else {
     const clipEndTime = video.currentTime;
     recording=false; btn.classList.remove('is-recording');
     timerEl.style.display='none'; clearInterval(recordTimerInterval);
+    showPlayerControls();
 
     if(clipEndTime - clipStartTime < 0.5){
       overlayText.textContent='Tocá para grabar un clip';
