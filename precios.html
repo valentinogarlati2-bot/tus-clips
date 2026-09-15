@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planes y Precios — Tus Clips</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -57,6 +60,23 @@ nav.solid{padding:13px 0;background:rgba(255,255,255,.9);backdrop-filter:blur(14
 /* PLANES */
 .plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:56px;}
 @media(max-width:960px){.plans-grid{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto;}}
+
+/* PLAN ÚNICO */
+.single-plan-card{background:#fff;border:1.5px solid var(--gray-line);border-radius:26px;padding:44px;margin-top:50px;max-width:680px;margin-left:auto;margin-right:auto;text-align:center;}
+@media(max-width:600px){.single-plan-card{padding:28px 20px;}}
+.sp-prices{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:30px;}
+.sp-price-box{flex:1;min-width:200px;background:var(--gray-soft);border-radius:18px;padding:24px 20px;}
+.sp-price-box.featured{background:var(--green-pale);}
+.sp-price-box .lbl{font-size:12.5px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px;}
+.sp-price-box .val{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;color:var(--green-dark);}
+.sp-price-box .note{font-size:12px;color:var(--gray-mid);margin-top:4px;}
+.sp-stepper{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-size:14px;font-weight:600;color:var(--gray-dark);}
+.stepper-ctrl{display:flex;align-items:center;gap:14px;background:var(--gray-soft);border-radius:100px;padding:8px 18px;}
+.stepper-ctrl button{width:28px;height:28px;border-radius:50%;background:var(--green-dark);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.stepper-ctrl button:hover{background:var(--green-darker);}
+.stepper-ctrl span{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;min-width:16px;text-align:center;}
+.single-plan-card .plan-feats{text-align:left;margin-left:auto;margin-right:auto;}
+
 .plan-card{
   background:var(--white);border:1.5px solid var(--gray-line);border-radius:22px;padding:34px 28px;
   display:flex;flex-direction:column;transition:transform .3s ease, box-shadow .3s ease;position:relative;
@@ -224,122 +244,47 @@ footer{padding:44px 0;border-top:1px solid var(--gray-line);}
   </div>
 </header>
 
-<!-- PLANES -->
+<!-- EL PLAN -->
 <section id="planes">
   <div class="wrap">
-    <div class="eyebrow-sm reveal">Planes de instalación</div>
-    <h2 class="section-title reveal">Elegí el plan según tu tipo de cancha.</h2>
-    <p class="section-sub reveal">Todos incluyen instalación, capacitación y soporte. El costo exacto se confirma según relevamiento del complejo — los valores de esta página son de referencia.</p>
+    <div class="eyebrow-sm reveal">El plan</div>
+    <h2 class="section-title reveal">Un solo plan, que crece con tu complejo.</h2>
+    <p class="section-sub reveal">No hay categorías ni niveles de calidad distintos — el mismo servicio completo para todas las canchas. Lo único que cambia es cuántas cámaras necesitás.</p>
 
-    <div class="plans-grid">
-      <!-- START -->
-      <div class="plan-card reveal">
-        <div class="plan-name">Plan Start</div>
-        <div class="plan-for">Ideal para Fútbol 5</div>
-        <ul class="plan-feats">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>1 cámara Full HD</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Instalación incluida</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Capacitación al staff</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Soporte estándar</li>
-        </ul>
-        <button class="plan-price-btn" onclick="openPlan('start')">
-          <div class="lbl">Instalación desde</div>
-          <div class="val">$149.900*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-price-btn" onclick="openSub('start')">
+    <div class="single-plan-card reveal">
+      <div class="sp-prices">
+        <div class="sp-price-box">
+          <div class="lbl">Instalación</div>
+          <div class="val" id="spInstalacion">$180.000</div>
+          <div class="note">por cámara, pago único</div>
+        </div>
+        <div class="sp-price-box featured">
           <div class="lbl">Suscripción mensual</div>
-          <div class="val">~$50.000*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-cta" onclick="scrollToContact('Hola, quiero cotizar el Plan Start para mi cancha de fútbol 5.')">Solicitar este plan</button>
+          <div class="val" id="spSuscripcion">$80.000</div>
+          <div class="note">por complejo, sin permanencia</div>
+        </div>
       </div>
 
-      <!-- PRO -->
-      <div class="plan-card featured reveal">
-        <span class="plan-badge">Más elegido</span>
-        <div class="plan-name">Plan Pro</div>
-        <div class="plan-for">Ideal para Fútbol 7</div>
-        <ul class="plan-feats">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>1 o 2 cámaras, mayor cobertura</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Mayor calidad de imagen</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Audio incluido</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Soporte prioritario</li>
-        </ul>
-        <button class="plan-price-btn" onclick="openPlan('pro')">
-          <div class="lbl">Instalación desde</div>
-          <div class="val">$219.900*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-price-btn" onclick="openSub('pro')">
-          <div class="lbl">Suscripción mensual</div>
-          <div class="val">~$69.900*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-cta" onclick="scrollToContact('Hola, quiero cotizar el Plan Pro para mi cancha de fútbol 7.')">Solicitar este plan</button>
+      <div class="sp-stepper">
+        <span>¿Cuántas canchas querés equipar?</span>
+        <div class="stepper-ctrl">
+          <button id="spMenos">−</button>
+          <span id="spCanchas">1</span>
+          <button id="spMas">+</button>
+        </div>
       </div>
+      <p class="disclaimer" style="margin-top:6px;">*Valores de referencia. El precio final se confirma según relevamiento del complejo (algunas canchas grandes, como fútbol 11, necesitan 2 cámaras).</p>
 
-      <!-- ELITE -->
-      <div class="plan-card reveal">
-        <div class="plan-name">Plan Elite</div>
-        <div class="plan-for">Canchas grandes · Fútbol 11</div>
-        <ul class="plan-feats">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>2 cámaras, cobertura completa</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Máxima calidad de imagen</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Preparado para IA</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Soporte prioritario</li>
-        </ul>
-        <button class="plan-price-btn" onclick="openPlan('elite')">
-          <div class="lbl">Instalación desde</div>
-          <div class="val">$339.900*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-price-btn" onclick="openSub('elite')">
-          <div class="lbl">Suscripción mensual</div>
-          <div class="val">~$89.900*</div>
-          <div class="see">Ver qué incluye
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
-          </div>
-        </button>
-        <button class="plan-cta" onclick="scrollToContact('Hola, quiero cotizar el Plan Elite para mi cancha de fútbol 11.')">Solicitar este plan</button>
-      </div>
-    </div>
-    <p class="disclaimer reveal">*Valores de referencia a modo de ejemplo. El precio final de instalación y suscripción todavía está en definición y se confirma según relevamiento de cada complejo.</p>
-  </div>
-</section>
+      <ul class="plan-feats" style="margin-top:26px;max-width:520px;">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Cámaras Full HD, exterior, resistentes a la intemperie</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Editor de video y creación de clips</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Descarga y compartir por WhatsApp</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Grupos de amigos, estadísticas y torneos</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Instalación, capacitación y soporte incluidos</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg><span class="soon" style="margin-right:6px;">Próximamente</span>Detección de goles y resúmenes con IA</li>
+      </ul>
 
-<!-- COMPARADOR -->
-<section style="background:var(--gray-soft);">
-  <div class="wrap">
-    <div class="eyebrow-sm reveal">Comparador</div>
-    <h2 class="section-title reveal">Los tres planes, lado a lado.</h2>
-    <div class="compare-wrap reveal">
-      <table>
-        <thead><tr><th>Característica</th><th>Start</th><th>Pro</th><th>Elite</th></tr></thead>
-        <tbody>
-          <tr><td>Cantidad de cámaras</td><td>1</td><td>1 o 2</td><td>2</td></tr>
-          <tr><td>Calidad</td><td>Full HD</td><td>Full HD+</td><td>Full HD / 2K</td></tr>
-          <tr><td>Editor de video</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Descarga de clips</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Compartir</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Grupos, estadísticas y torneos</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Panel administrador</td><td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Acceso entrenador</td><td class="dash">—</td><td class="tick">✓</td><td class="tick">✓</td></tr>
-          <tr><td>Resúmenes con IA</td><td><span class="soon">Próximamente</span></td><td><span class="soon">Próximamente</span></td><td><span class="soon">Próximamente</span></td></tr>
-          <tr><td>Detección de goles</td><td class="dash">—</td><td><span class="soon">Próximamente</span></td><td><span class="soon">Próximamente</span></td></tr>
-          <tr><td>Estadísticas avanzadas</td><td class="dash">—</td><td class="dash">—</td><td><span class="soon">Próximamente</span></td></tr>
-        </tbody>
-      </table>
+      <button class="plan-cta" style="max-width:320px;margin-top:26px;" onclick="scrollToContact('Hola, quiero cotizar la instalación de Tus Clips para mi complejo.')">Solicitar instalación</button>
     </div>
   </div>
 </section>
@@ -370,25 +315,11 @@ footer{padding:44px 0;border-top:1px solid var(--gray-line);}
               <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="5">5</option><option value="10">10</option>
             </select>
           </div>
-          <div class="calc-field">
-            <label>Cámaras por cancha</label>
-            <select id="calcCamaras">
-              <option value="1">1</option><option value="2">2</option>
-            </select>
-          </div>
-          <div class="calc-field">
-            <label>Calidad</label>
-            <select id="calcCalidad">
-              <option value="hd">HD</option>
-              <option value="fullhd" selected>Full HD</option>
-              <option value="2k">2K</option>
-            </select>
-          </div>
         </div>
 
         <div class="calc-result">
           <div class="calc-row"><span>Costo estimado de instalación</span><span class="v" id="rInstalacion">—</span></div>
-          <div class="calc-row"><span>Costo mensual</span><span class="v" id="rMensual">—</span></div>
+          <div class="calc-row"><span>Suscripción mensual</span><span class="v" id="rMensual">—</span></div>
           <div class="calc-row"><span>Costo anual estimado</span><span class="v" id="rAnual">—</span></div>
           <div class="calc-rec" id="rRecomendacion">Elegí las opciones para ver la recomendación.</div>
         </div>
@@ -402,7 +333,7 @@ footer{padding:44px 0;border-top:1px solid var(--gray-line);}
   <div class="wrap">
     <div class="eyebrow-sm reveal">¿Cómo recuperás la inversión?</div>
     <h2 class="section-title reveal">Tu cancha también genera ingresos con cada partido.</h2>
-    <p class="section-sub reveal">Editá los valores según tu realidad y mirá cuánto podría generar tu complejo por mes vendiendo el video de cada partido.</p>
+    <p class="section-sub reveal">Editá los valores según tu realidad y mirá cuánto podría generar tu complejo, y cuántos partidos necesitás vender para cubrir la instalación y la suscripción mensual.</p>
 
     <div class="roi-grid">
       <div>
@@ -423,8 +354,14 @@ footer{padding:44px 0;border-top:1px solid var(--gray-line);}
         <div class="lbl">Ingreso estimado para el complejo, por mes</div>
         <div class="big" id="roiTotal">$75.000</div>
         <hr>
-        <div class="lbl">Ingreso estimado anual</div>
-        <div class="big" id="roiAnual" style="font-size:22px;">$900.000</div>
+        <div class="lbl">Partidos vendidos necesarios para cubrir la instalación (1 cámara)</div>
+        <div class="big" id="roiPartidosInstalacion" style="font-size:22px;">—</div>
+        <hr>
+        <div class="lbl">Partidos por mes necesarios para cubrir la suscripción</div>
+        <div class="big" id="roiPartidosSuscripcion" style="font-size:22px;">—</div>
+        <hr>
+        <div class="lbl">Con este ritmo, recuperás la instalación en</div>
+        <div class="big" id="roiMesesRecupero" style="font-size:22px;">—</div>
       </div>
     </div>
   </div>
@@ -499,121 +436,50 @@ function toast(msg){
   setTimeout(()=>{ el.style.opacity='0'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }, 2400);
 }
 
-/* ---------- datos de planes (hardware + suscripción) ---------- */
-const PLAN_DATA = {
-  start:{
-    name:'Plan Start', price:'$149.900*',
-    hardware:[
-      'Cámara IP WiFi Dahua 2MP Full HD, exterior IP67, visión nocturna 30m',
-      'Tarjeta microSD 128GB especial para video-vigilancia (grabación continua)',
-      'Router / modem WiFi (si el complejo no cuenta con uno apto)',
-      'Cableado, soportes de fijación y protección para exterior',
-      'Configuración completa y capacitación al personal de la cancha',
-    ]
-  },
-  pro:{
-    name:'Plan Pro', price:'$219.900*',
-    hardware:[
-      '1 o 2 cámaras IP WiFi Dahua 4MP con audio bidireccional, exterior IP67',
-      'Tarjeta microSD 256GB especial para video-vigilancia',
-      'Router / switch de red para soportar más de una cámara',
-      'Cableado, soportes de fijación y protección para exterior',
-      'Configuración completa y capacitación al personal de la cancha',
-    ]
-  },
-  elite:{
-    name:'Plan Elite', price:'$339.900*',
-    hardware:[
-      '2 cámaras IP WiFi Dahua 4MP/2K, mayor alcance IR, exterior IP67',
-      '2 tarjetas microSD 256GB especiales para video-vigilancia (o NVR local)',
-      'Router / switch de red dedicado para el complejo',
-      'Cableado extendido, soportes de fijación y protección para exterior',
-      'Configuración completa y capacitación avanzada al personal',
-    ]
-  }
-};
-const SUB_FEATURES = [
-  'Procesamiento y disponibilidad del video en pocos minutos después del partido',
-  'Editor de clips integrado: recortar, previsualizar, descargar y compartir',
-  'Acceso al video con código, sin necesidad de crear cuenta',
-  'Retención del video del partido por 30 a 45 días (más tiempo si se guarda en una cuenta)',
-  'Grupos de amigos con estadísticas por jugador',
-  'Organización de partidos entre distintos grupos',
-  'Torneos internos entre grupos o jugadores del mismo grupo',
-  'Soporte técnico para el complejo',
-];
+/* ---------- precios del plan único ---------- */
+const INSTALACION_POR_CAMARA = 180000;
 
-function iconCheck(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'; }
-
-function openPlan(key){
-  const p = PLAN_DATA[key];
-  document.getElementById('modalBox').innerHTML = `
-    <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h3>Instalación — ${p.name}</h3>
-    <div class="modal-sub">Esto es lo que incluye el pago inicial de instalación.</div>
-    <div class="modal-section-title">Equipamiento incluido</div>
-    <ul class="modal-list">
-      ${p.hardware.map(h=>`<li>${iconCheck()}${h}</li>`).join('')}
-    </ul>
-    <div class="modal-price-box">
-      <div class="val">${p.price}</div>
-      <div class="note">Pago único de instalación · valor de referencia, a confirmar según relevamiento del complejo</div>
-    </div>
-    <button class="modal-cta" onclick="closeModal(); scrollToContact();">Consultar por este plan</button>
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
+function suscripcionPorCanchas(n){
+  if(n<=0) return 0;
+  let total = 80000;
+  for(let i=2;i<=n;i++){ total += Math.max(30000, 80000-(i-2)*10000); }
+  return total;
 }
 
-function openSub(key){
-  const p = PLAN_DATA[key];
-  document.getElementById('modalBox').innerHTML = `
-    <button class="modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <h3>Suscripción mensual — ${p.name}</h3>
-    <div class="modal-sub">El abono mensual cubre el servicio de la plataforma, no el hardware (eso ya quedó pago en la instalación).</div>
-    <div class="modal-section-title">Qué incluye</div>
-    <ul class="modal-list">
-      ${SUB_FEATURES.map(h=>`<li>${iconCheck()}${h}</li>`).join('')}
-    </ul>
-    <div class="modal-price-box">
-      <div class="val">~$50.000 / mes*</div>
-      <div class="note">Valor de referencia, todavía en definición · sin permanencia obligatoria</div>
-    </div>
-    <button class="modal-cta" onclick="closeModal(); scrollToContact();">Consultar por este plan</button>
-  `;
-  document.getElementById('modalOverlay').classList.add('open');
+function fmtMoney(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
+
+function recomendarCamaras(tipo){
+  if(tipo==='futbol11') return 2;
+  return 1;
 }
 
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
 function closeModalBg(e){ if(e.target.id==='modalOverlay') closeModal(); }
 
+/* ---------- stepper del plan único ---------- */
+let spCanchasN = 1;
+function renderSinglePlan(){
+  const instalacion = INSTALACION_POR_CAMARA * spCanchasN;
+  const suscripcion = suscripcionPorCanchas(spCanchasN);
+  document.getElementById('spCanchas').textContent = spCanchasN;
+  document.getElementById('spInstalacion').textContent = fmtMoney(instalacion);
+  document.getElementById('spSuscripcion').textContent = fmtMoney(suscripcion);
+}
+document.getElementById('spMenos').addEventListener('click', ()=>{ if(spCanchasN>1){ spCanchasN--; renderSinglePlan(); } });
+document.getElementById('spMas').addEventListener('click', ()=>{ if(spCanchasN<10){ spCanchasN++; renderSinglePlan(); } });
+renderSinglePlan();
+
 /* ---------- calculadora de instalación ---------- */
 const calcTipo = document.getElementById('calcTipo');
 const calcCanchas = document.getElementById('calcCanchas');
-const calcCamaras = document.getElementById('calcCamaras');
-const calcCalidad = document.getElementById('calcCalidad');
-
-function fmtMoney(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
-
-function recomendarCamaras(tipo){
-  if(tipo==='futbol5' || tipo==='padel') return 1;
-  if(tipo==='futbol7' || tipo==='tenis') return 1;
-  if(tipo==='futbol11') return 2;
-  return 1;
-}
 
 function updateCalc(){
-  // auto-sugerir cámaras según tipo de cancha
-  const rec = recomendarCamaras(calcTipo.value);
-  calcCamaras.value = rec;
-
   const canchas = parseInt(calcCanchas.value);
-  const camarasPorCancha = parseInt(calcCamaras.value);
-  const calidad = calcCalidad.value;
+  const rec = recomendarCamaras(calcTipo.value);
+  const totalCamaras = canchas * rec;
 
-  const precioBaseCamara = calidad==='hd' ? 90000 : calidad==='fullhd' ? 130000 : 190000; // 2K
-  const totalCamaras = canchas * camarasPorCancha;
-  const instalacion = totalCamaras * precioBaseCamara + canchas * 25000; // costo de mano de obra por cancha
-  const mensual = canchas * 55000 + (camarasPorCancha>1 ? canchas*10000 : 0);
+  const instalacion = totalCamaras * INSTALACION_POR_CAMARA;
+  const mensual = suscripcionPorCanchas(canchas);
   const anual = mensual*12;
 
   document.getElementById('rInstalacion').textContent = fmtMoney(instalacion)+'*';
@@ -627,10 +493,10 @@ function updateCalc(){
     : ', suficiente para cubrir el juego completo en una cancha de este tamaño.';
   document.getElementById('rRecomendacion').textContent = texto+' Valores simulados — se confirman con una visita al complejo.';
 }
-[calcTipo, calcCanchas, calcCamaras, calcCalidad].forEach(el=>el.addEventListener('change', updateCalc));
+[calcTipo, calcCanchas].forEach(el=>el.addEventListener('change', updateCalc));
 updateCalc();
 
-/* ---------- ROI calculadora ---------- */
+/* ---------- ROI: cuántos partidos hacen falta para cubrir instalación y suscripción ---------- */
 const roiPartidos = document.getElementById('roiPartidos');
 const roiPorc = document.getElementById('roiPorc');
 const roiPrecio = document.getElementById('roiPrecio');
@@ -639,9 +505,31 @@ function updateRoi(){
   const partidos = parseFloat(roiPartidos.value)||0;
   const porc = parseFloat(roiPorc.value)||0;
   const precio = parseFloat(roiPrecio.value)||0;
-  const total = partidos * (porc/100) * precio;
-  document.getElementById('roiTotal').textContent = fmtMoney(total);
-  document.getElementById('roiAnual').textContent = fmtMoney(total*12);
+  const ingresoPorPartido = (porc/100) * precio;
+  const ingresoMensual = partidos * ingresoPorPartido;
+
+  document.getElementById('roiTotal').textContent = fmtMoney(ingresoMensual);
+
+  if(ingresoPorPartido <= 0){
+    document.getElementById('roiPartidosInstalacion').textContent = '—';
+    document.getElementById('roiPartidosSuscripcion').textContent = '—';
+    document.getElementById('roiMesesRecupero').textContent = '—';
+    return;
+  }
+
+  const partidosInstalacion = Math.ceil(INSTALACION_POR_CAMARA / ingresoPorPartido);
+  const partidosSuscripcion = Math.ceil(80000 / ingresoPorPartido);
+  document.getElementById('roiPartidosInstalacion').textContent = partidosInstalacion + ' partidos';
+  document.getElementById('roiPartidosSuscripcion').textContent = partidosSuscripcion + ' partidos/mes';
+
+  if(ingresoMensual > 0){
+    const meses = INSTALACION_POR_CAMARA / ingresoMensual;
+    document.getElementById('roiMesesRecupero').textContent = meses < 1
+      ? 'menos de 1 mes'
+      : Math.ceil(meses) + (Math.ceil(meses)===1 ? ' mes' : ' meses');
+  } else {
+    document.getElementById('roiMesesRecupero').textContent = '—';
+  }
 }
 [roiPartidos, roiPorc, roiPrecio].forEach(el=>el.addEventListener('input', updateRoi));
 updateRoi();
