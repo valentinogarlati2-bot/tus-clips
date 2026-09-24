@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Tus Clips</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .card {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 480px;
+    width: 100%;
+  }
+  h1 { font-size: 20px; margin-top: 0; }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #f1f5f9;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .dropzone {
+    border: 2px dashed #475569;
+    border-radius: 12px;
+    padding: 32px 16px;
+    text-align: center;
+    color: #94a3b8;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .dropzone.drag { border-color: #22c55e; color: #22c55e; }
+  button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
+    background: #22c55e;
+    color: #0f172a;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+  .progress-wrap {
+    background: #0f172a;
+    border-radius: 8px;
+    height: 12px;
+    overflow: hidden;
+    margin-top: 12px;
+    display: none;
+  }
+  .progress-bar {
+    background: #22c55e;
+    height: 100%;
+    width: 0%;
+    transition: width 0.2s;
+  }
+  .status { margin-top: 12px; font-size: 14px; color: #94a3b8; white-space: pre-line; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div id="gate">
+    <h1>Acceso Admin</h1>
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button onclick="checkPass()">Entrar</button>
+  </div>
+
+  <div id="panel" class="hidden">
+    <h1>Subir video de partido</h1>
+
+    <input type="text" id="codigo" placeholder="Código de acceso del partido (ej: AE-0107)">
+
+    <div class="dropzone" id="dropzone">
+      Arrastrá el video acá o tocá para elegir el archivo
+      <input type="file" id="fileInput" accept="video/*" style="display:none">
+    </div>
+
+    <div id="fileName" class="status"></div>
+
+    <button id="uploadBtn" onclick="startUpload()">Subir video</button>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="status" id="statusText"></div>
+  </div>
+</div>
+
+<script>
+  // Cambiá esta contraseña por la que quieras usar
+  const ADMIN_PASSWORD = "camaras2026";
+
+  let selectedFile = null;
+
+  function checkPass() {
+    const val = document.getElementById('pass').value;
+    if (val === ADMIN_PASSWORD) {
+      document.getElementById('gate').classList.add('hidden');
+      document.getElementById('panel').classList.remove('hidden');
+    } else {
+      alert('Contraseña incorrecta');
+    }
+  }
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('drag');
+  });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if (e.dataTransfer.files.length) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) setFile(fileInput.files[0]);
+  });
+
+  function setFile(file) {
+    selectedFile = file;
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    document.getElementById('fileName').textContent = `Seleccionado: ${file.name} (${sizeMb} MB)`;
+  }
+
+  async function startUpload() {
+    const codigo = document.getElementById('codigo').value.trim();
+    const statusText = document.getElementById('statusText');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressBar = document.getElementById('progressBar');
+
+    if (!codigo) { alert('Poné el código de acceso del partido'); return; }
+    if (!selectedFile) { alert('Elegí un video primero'); return; }
+
+    uploadBtn.disabled = true;
+    statusText.textContent = 'Preparando subida...';
+
+    try {
+      const ext = selectedFile.name.split('.').pop() || 'mp4';
+      const filename = `${codigo}-${Date.now()}.${ext}`;
+
+      // 1. Pedir URL firmada
+      const presignResp = await fetch('/api/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, contentType: selectedFile.type || 'video/mp4' }),
+      });
+      const presignData = await presignResp.json();
+      if (!presignResp.ok) throw new Error(presignData.error || 'Error generando URL de subida');
+
+      // 2. Subir directo a R2 con barra de progreso
+      progressWrap.style.display = 'block';
+      statusText.textContent = 'Subiendo video...';
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', presignData.url);
+        xhr.setRequestHeader('Content-Type', selectedFile.type || 'video/mp4');
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = pct + '%';
+            statusText.textContent = `Subiendo... ${pct}%`;
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error('Error subiendo el archivo a R2 (status ' + xhr.status + ')'));
+        };
+        xhr.onerror = () => reject(new Error('Error de red subiendo el archivo'));
+        xhr.send(selectedFile);
+      });
+
+      // 3. Confirmar en Supabase
+      statusText.textContent = 'Actualizando partido en Supabase...';
+      const confirmResp = await fetch('/api/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codigoAcceso: codigo, filename }),
+      });
+      const confirmData = await confirmResp.json();
+      if (!confirmResp.ok) throw new Error(confirmData.error || 'Error actualizando Supabase');
+
+      statusText.textContent = '✅ Listo! Video subido y vinculado al partido ' + codigo;
+      progressBar.style.width = '100%';
+    } catch (err) {
+      statusText.textContent = '❌ ' + err.message;
+    } finally {
+      uploadBtn.disabled = false;
+    }
+  }
+</script>
+
+</body>
+</html>
