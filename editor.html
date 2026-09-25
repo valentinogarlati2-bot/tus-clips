@@ -59,7 +59,7 @@ a{color:inherit;text-decoration:none;}
 /* VIDEO CARD */
 .card{background:var(--white);border:1px solid var(--gray-line);border-radius:var(--r-lg);padding:16px;}
 .player-wrap{position:relative;border-radius:var(--r-md);overflow:hidden;background:#000;aspect-ratio:16/9;touch-action:none;}
-.player-wrap video{width:100%;height:100%;object-fit:cover;display:block;transform-origin:center center;will-change:transform;}
+.player-wrap video{width:100%;height:100%;object-fit:contain;display:block;transform-origin:center center;will-change:transform;background:#000;}
 .player-wrap.pseudo-fullscreen{position:fixed;inset:0;z-index:9999;border-radius:0;width:100vw;height:100vh;height:100dvh;aspect-ratio:unset;}
 .player-overlay-top{
   position:absolute;top:0;left:0;right:0;padding:12px 14px;
