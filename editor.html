@@ -237,6 +237,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
 .modal-sub{font-size:12.5px;color:var(--gray-mid);margin-bottom:16px;}
 .modal-box video{width:100%;border-radius:12px;background:#000;max-height:280px;display:block;margin-bottom:16px;}
 
+.cat-group-label{font-size:11.5px;font-weight:700;color:var(--gray-mid);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;}
 .cat-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
 .cat-chip{padding:9px 14px;border-radius:100px;border:1.5px solid var(--gray-line);font-size:13px;font-weight:600;color:var(--gray-dark);transition:all .2s;}
 .cat-chip:hover{border-color:var(--green-light);}
@@ -478,11 +479,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
     <h3>Guardar clip</h3>
     <p class="modal-sub">Mirálo, elegí una categoría y ponele nombre.</p>
     <video id="clipPreviewVideo" controls playsinline></video>
-    <div class="cat-chips" id="catChips">
+    <div class="cat-group-label">⚽ Fútbol</div>
+    <div class="cat-chips" id="catChipsFutbol">
       <button class="cat-chip" data-cat="Gol">⚽ Gol</button>
       <button class="cat-chip" data-cat="Atajada">🥅 Atajada</button>
       <button class="cat-chip" data-cat="Buena jugada">🔥 Buena jugada</button>
       <button class="cat-chip" data-cat="Patada">🦵 Patada</button>
+    </div>
+    <div class="cat-group-label">🎾 Pádel</div>
+    <div class="cat-chips" id="catChipsPadel">
+      <button class="cat-chip" data-cat="Buen punto">🎾 Buen punto</button>
+      <button class="cat-chip" data-cat="Bandeja">💥 Bandeja</button>
+      <button class="cat-chip" data-cat="Doble pared">🧱 Doble pared</button>
+      <button class="cat-chip" data-cat="Blooper">😂 Blooper</button>
+    </div>
+    <div class="cat-chips" id="catChipsOtro">
       <button class="cat-chip" data-cat="Otro">✏️ Otro</button>
     </div>
     <div class="field" id="catOtroField" style="display:none;">
