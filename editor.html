@@ -1216,160 +1216,134 @@ async function intentarWebShare(clip){
       const { error } = await supabase.rpc('desvincular_partido_de_grupo', { codigo: currentCodigo });
       if(error) throw error;
       closeGroupModal();
-      toast('Partido desvinculado');
+      currentGrupoId = null; currentGrupoNombre = null;
       refreshGroupStatus();
-      cargarJugadoresPartido();
-    } catch(e){ console.error(e); toast('No se pudo desvincular: ' + (e.message || 'error desconocido')); }
+      toast('Partido desvinculado del grupo');
+    } catch(e){ console.error(e); toast('No se pudo desvincular'); }
   };
-  function closeGroupModal(){ document.getElementById('groupModalOverlay').classList.remove('open'); }
-  document.getElementById('groupModalClose').addEventListener('click', closeGroupModal);
-  window.closeGroupModal = closeGroupModal;
+  window.closeGroupModal = function(){ document.getElementById('groupModalOverlay').classList.remove('open'); };
+  $('groupModalClose').addEventListener('click', closeGroupModal);
 
   async function renderMisGrupos(){
-    const wrap = document.getElementById('misGruposList');
-    wrap.innerHTML = '<div style="font-size:12.5px;color:var(--gray-mid);">Cargando tus grupos...</div>';
-    const { data, error } = await supabase.rpc('mis_grupos');
-    if(error || !data || data.length===0){
-      wrap.innerHTML = '<div style="font-size:12.5px;color:var(--gray-mid);">Todavía no sos parte de ningún grupo.</div>';
-      return;
-    }
-    wrap.innerHTML = data.map(g => `
-      <div class="group-option" onclick="vincularGrupo('${g.grupo_id}')">
+    const { data } = await supabase.rpc('mis_grupos');
+    const list = document.getElementById('misGruposList');
+    if(!data || data.length===0){ list.innerHTML = ''; return; }
+    list.innerHTML = data.map(g => `
+      <div class="group-option" style="cursor:pointer;" onclick="vincularAGrupo('${g.grupo_id}','${(g.nombre||'').replace(/'/g,"\\'")}')">
         <span class="gname">${g.nombre}</span>
-        <span class="gbadge">${g.es_creador ? 'Creador' : 'Miembro'} · código ${g.codigo_invitacion}</span>
+        <span class="gbadge">Mi grupo</span>
       </div>
     `).join('');
   }
-  window.vincularGrupo = async function(grupoId){
+  window.vincularAGrupo = async function(grupoId, nombre){
+    if(!currentCodigo) return;
     try{
-      await supabase.rpc('vincular_partido_a_grupo', { codigo: currentCodigo, grupo_id_param: grupoId });
+      const { error } = await supabase.rpc('vincular_partido_a_grupo', { codigo: currentCodigo, p_grupo_id: grupoId });
+      if(error) throw error;
+      currentGrupoId = grupoId; currentGrupoNombre = nombre;
       closeGroupModal();
-      toast('Partido vinculado al grupo');
       refreshGroupStatus();
       cargarJugadoresPartido();
+      toast('Partido vinculado a "'+nombre+'"');
     } catch(e){ console.error(e); toast('No se pudo vincular el grupo'); }
   };
 
-  document.getElementById('crearGrupoBtn').addEventListener('click', async ()=>{
-    const nombre = document.getElementById('nuevoGrupoNombre').value.trim();
-    const errEl = document.getElementById('createGroupError');
-    errEl.style.display = 'none';
-    if(!nombre){ errEl.textContent='Escribí un nombre para el grupo.'; errEl.style.display='block'; return; }
-    const btn = document.getElementById('crearGrupoBtn');
-    btn.disabled = true; btn.textContent = 'Creando...';
+  $('crearGrupoBtn').addEventListener('click', async ()=>{
+    const nombre = $('nuevoGrupoNombre').value.trim();
+    const errEl = $('createGroupError');
+    errEl.style.display='none';
+    if(!nombre){ errEl.textContent='Escribí un nombre para el grupo'; errEl.style.display='block'; return; }
     try{
-      const { data, error } = await supabase.rpc('crear_grupo', { nombre_grupo: nombre });
+      const { data, error } = await supabase.rpc('crear_grupo', { p_nombre: nombre });
       if(error) throw error;
-      const row = data[0];
-      const { error: linkError } = await supabase.rpc('vincular_partido_a_grupo', { codigo: currentCodigo, grupo_id_param: row.grupo_id });
-      if(linkError) throw linkError;
-      closeGroupModal();
-      toast('Grupo "'+nombre+'" creado. Código de invitación: '+row.codigo_invitacion);
-      refreshGroupStatus();
-      cargarJugadoresPartido();
-    } catch(e){
-      console.error(e);
-      errEl.textContent = (e && e.message) ? e.message : 'No se pudo crear el grupo.';
-      errEl.style.display = 'block';
-    }
-    btn.disabled = false; btn.textContent = 'Crear grupo';
+      $('nuevoGrupoNombre').value='';
+      if(currentCodigo && data){
+        await supabase.rpc('vincular_partido_a_grupo', { codigo: currentCodigo, p_grupo_id: data });
+        currentGrupoId = data; currentGrupoNombre = nombre;
+        closeGroupModal();
+        refreshGroupStatus();
+        cargarJugadoresPartido();
+        toast('Grupo "'+nombre+'" creado y vinculado');
+      }
+    } catch(e){ console.error(e); errEl.textContent='No se pudo crear el grupo'; errEl.style.display='block'; }
   });
 
-  document.getElementById('unirseGrupoBtn').addEventListener('click', async ()=>{
-    const codigo = document.getElementById('codigoGrupoInput').value.trim();
-    const errEl = document.getElementById('joinGroupError');
-    errEl.style.display = 'none';
-    if(!codigo){ errEl.textContent='Ingresá el código de invitación.'; errEl.style.display='block'; return; }
-    const btn = document.getElementById('unirseGrupoBtn');
-    btn.disabled = true; btn.textContent = 'Uniendo...';
+  $('unirseGrupoBtn').addEventListener('click', async ()=>{
+    const codigoGrupo = $('codigoGrupoInput').value.trim();
+    const errEl = $('joinGroupError');
+    errEl.style.display='none';
+    if(!codigoGrupo){ errEl.textContent='Escribí un código de invitación'; errEl.style.display='block'; return; }
     try{
-      const gid = await supabase.rpc('unirse_a_grupo', { codigo });
-      if(gid.error) throw gid.error;
-      const { error: linkError } = await supabase.rpc('vincular_partido_a_grupo', { codigo: currentCodigo, grupo_id_param: gid.data });
-      if(linkError) throw linkError;
-      closeGroupModal();
-      toast('Te uniste al grupo y se vinculó el partido');
-      refreshGroupStatus();
-      cargarJugadoresPartido();
-    } catch(e){
-      console.error(e);
-      errEl.textContent = (e && e.message) ? e.message : 'Código de grupo inválido.';
-      errEl.style.display = 'block';
-    }
-    btn.disabled = false; btn.textContent = 'Unirme al grupo';
+      const { data, error } = await supabase.rpc('unirse_a_grupo', { p_codigo_invitacion: codigoGrupo });
+      if(error) throw error;
+      $('codigoGrupoInput').value='';
+      await renderMisGrupos();
+      toast('Te uniste al grupo');
+    } catch(e){ console.error(e); errEl.textContent='Código inválido o ya venció'; errEl.style.display='block'; }
   });
 
-  /* ---------- jugadores por equipo ---------- */
-  let jugadoresA = [], jugadoresB = [];
-  function playerRowHtml(j){
-    return `<div class="player-row">
-      <span class="pname">${j.nombre}</span>
-      <div class="goal-ctrl">
-        <button onclick="cambiarGol('${j.jugador_id}',-1)">−</button>
-        <span class="goles">${j.goles}</span>
-        <button onclick="cambiarGol('${j.jugador_id}',1)">+</button>
-      </div>
-      <button class="rm" onclick="quitarJugador('${j.jugador_id}')">×</button>
-    </div>`;
-  }
+  /* ---------- jugadores y goles ---------- */
+  let jugadoresPartido = { A: [], B: [] };
+
   function renderJugadores(){
-    document.getElementById('teamAList').innerHTML = jugadoresA.length ? jugadoresA.map(playerRowHtml).join('') : '<div class="empty-players">Sin jugadores todavía</div>';
-    document.getElementById('teamBList').innerHTML = jugadoresB.length ? jugadoresB.map(playerRowHtml).join('') : '<div class="empty-players">Sin jugadores todavía</div>';
+    const listA = document.getElementById('teamAList');
+    const listB = document.getElementById('teamBList');
+    const render = (arr) => arr.length===0
+      ? '<div class="empty-players">Sin jugadores todavía</div>'
+      : arr.map(j => `
+        <div class="player-row">
+          <span class="pname">${j.nombre}</span>
+          <div class="goal-ctrl">
+            <button onclick="cambiarGol('${j.id}',-1)">−</button>
+            <span class="goles">${j.goles||0}</span>
+            <button onclick="cambiarGol('${j.id}',1)">+</button>
+          </div>
+          <button class="rm" onclick="quitarJugador('${j.id}')">✕</button>
+        </div>
+      `).join('');
+    listA.innerHTML = render(jugadoresPartido.A);
+    listB.innerHTML = render(jugadoresPartido.B);
   }
-  renderJugadores();
+
+  window.cargarJugadoresPartido = async function(){
+    if(!currentCodigo){ jugadoresPartido={A:[],B:[]}; renderJugadores(); return; }
+    const { data, error } = await supabase.rpc('jugadores_de_partido', { codigo: currentCodigo });
+    if(error || !data){ jugadoresPartido={A:[],B:[]}; renderJugadores(); return; }
+    jugadoresPartido = {
+      A: data.filter(j=>j.equipo==='A'),
+      B: data.filter(j=>j.equipo==='B')
+    };
+    renderJugadores();
+  };
 
   window.agregarJugador = async function(equipo){
+    if(!currentCodigo){ toast('Entrá con un código real para agregar jugadores'); return; }
     const inputId = equipo==='A' ? 'teamAInput' : 'teamBInput';
-    const nombre = $(inputId).value.trim();
-    if(!nombre){ toast('Escribí el nombre del jugador'); return; }
-    $(inputId).value = '';
-    if(!currentCodigo){
-      (equipo==='A'?jugadoresA:jugadoresB).push({jugador_id:'local-'+Date.now(), nombre, goles:0});
-      renderJugadores();
-      toast('Jugador agregado en esta vista (entrá con un código real para guardarlo)');
-      return;
-    }
+    const nombre = document.getElementById(inputId).value.trim();
+    if(!nombre) return;
     try{
-      const { error } = await supabase.rpc('agregar_jugador_a_partido', { codigo: currentCodigo, nombre_jugador: nombre, equipo_jugador: equipo });
+      const { error } = await supabase.rpc('agregar_jugador_a_partido', { codigo: currentCodigo, p_nombre: nombre, p_equipo: equipo });
       if(error) throw error;
+      document.getElementById(inputId).value='';
       await cargarJugadoresPartido();
-      toast('Jugador agregado');
-    } catch(e){ console.error(e); toast('No se pudo agregar: ' + (e.message || 'error desconocido')); }
+    } catch(e){ console.error(e); toast('No se pudo agregar el jugador'); }
   };
-  window.cambiarGol = async function(jugadorId, delta){
-    if(String(jugadorId).startsWith('local-')){
-      [...jugadoresA, ...jugadoresB].forEach(j=>{ if(j.jugador_id===jugadorId) j.goles = Math.max(0, j.goles+delta); });
-      renderJugadores(); return;
-    }
-    if(!currentCodigo) return;
-    try{
-      const { error } = await supabase.rpc('sumar_gol_jugador', { codigo: currentCodigo, jugador_id_param: jugadorId, delta });
-      if(error) throw error;
-      await cargarJugadoresPartido();
-    } catch(e){ console.error(e); toast('No se pudo actualizar el gol: ' + (e.message || 'error desconocido')); }
-  };
+
   window.quitarJugador = async function(jugadorId){
-    if(String(jugadorId).startsWith('local-')){
-      jugadoresA = jugadoresA.filter(j=>j.jugador_id!==jugadorId);
-      jugadoresB = jugadoresB.filter(j=>j.jugador_id!==jugadorId);
-      renderJugadores(); return;
-    }
-    if(!currentCodigo) return;
     try{
-      const { error } = await supabase.rpc('quitar_jugador_de_partido', { codigo: currentCodigo, jugador_id_param: jugadorId });
+      const { error } = await supabase.rpc('quitar_jugador_de_partido', { p_jugador_id: jugadorId });
       if(error) throw error;
       await cargarJugadoresPartido();
-    } catch(e){ console.error(e); toast('No se pudo quitar: ' + (e.message || 'error desconocido')); }
+    } catch(e){ console.error(e); toast('No se pudo quitar el jugador'); }
   };
-  async function cargarJugadoresPartido(){
-    if(!currentCodigo) return;
-    const { data, error } = await supabase.rpc('jugadores_de_partido', { codigo: currentCodigo });
-    if(!error && data){
-      jugadoresA = data.filter(j=>j.equipo==='A');
-      jugadoresB = data.filter(j=>j.equipo==='B');
-      renderJugadores();
-    }
-  }
+
+  window.cambiarGol = async function(jugadorId, delta){
+    try{
+      const { error } = await supabase.rpc('sumar_gol_jugador', { p_jugador_id: jugadorId, p_delta: delta });
+      if(error) throw error;
+      await cargarJugadoresPartido();
+    } catch(e){ console.error(e); toast('No se pudo actualizar el gol'); }
+  };
 
   /* ---------- cargar partido real por código ---------- */
   function fmtHora(h){ return h.slice(0,5); }
@@ -1383,7 +1357,7 @@ async function intentarWebShare(clip){
     }
     const p = data[0];
     currentCodigo = codigo;
-    supabase.rpc('sumar_vista_partido', { codigo }).catch(()=>{});
+    try { await supabase.rpc('sumar_vista_partido', { codigo }); } catch(e) {}
 
     if(p.video_url){
       currentVideoUrl = p.video_url;
