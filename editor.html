@@ -1383,6 +1383,7 @@ async function intentarWebShare(clip){
     }
     const p = data[0];
     currentCodigo = codigo;
+    supabase.rpc('sumar_vista_partido', { codigo }).catch(()=>{});
 
     if(p.video_url){
       currentVideoUrl = p.video_url;
