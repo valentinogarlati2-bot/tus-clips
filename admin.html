@@ -23,7 +23,10 @@
     width: 100%;
   }
   h1 { font-size: 20px; margin-top: 0; }
-  input[type="password"], input[type="text"] {
+  label { display:block; font-size: 12.5px; color:#94a3b8; margin: 0 0 4px; font-weight:600; }
+  .row { margin-bottom: 14px; }
+  .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  input[type="password"], input[type="text"], input[type="date"], input[type="time"], input[type="number"] {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -31,8 +34,9 @@
     background: #0f172a;
     color: #f1f5f9;
     font-size: 16px;
-    margin-bottom: 12px;
   }
+  details { margin-bottom: 14px; }
+  summary { cursor:pointer; font-size:13px; color:#94a3b8; margin-bottom:10px; }
   .dropzone {
     border: 2px dashed #475569;
     border-radius: 12px;
@@ -71,6 +75,7 @@
   }
   .status { margin-top: 12px; font-size: 14px; color: #94a3b8; white-space: pre-line; }
   .hidden { display: none; }
+  .partido-ok { margin-top:10px; padding:10px 12px; border-radius:8px; background:#052e1a; color:#4ade80; font-size:13.5px; display:none; }
 </style>
 </head>
 <body>
@@ -85,7 +90,44 @@
   <div id="panel" class="hidden">
     <h1>Subir video de partido</h1>
 
-    <input type="text" id="codigo" placeholder="Código de acceso del partido (ej: AE-0107)">
+    <div class="row">
+      <label>Complejo</label>
+      <input type="text" id="complejo" placeholder="Ej: Valladares" list="complejosList">
+      <datalist id="complejosList"><option value="Valladares"></option></datalist>
+    </div>
+    <div class="row">
+      <label>Cancha</label>
+      <input type="text" id="cancha" placeholder="Ej: Cancha 3" list="canchasList">
+      <datalist id="canchasList"><option value="Cancha 1"></option><option value="Cancha 2"></option><option value="Cancha 3"></option></datalist>
+    </div>
+    <div class="row row-2">
+      <div>
+        <label>Fecha del partido</label>
+        <input type="date" id="fecha">
+      </div>
+      <div>
+        <label>Hora de inicio</label>
+        <input type="time" id="horaInicio">
+      </div>
+    </div>
+
+    <details>
+      <summary>Datos opcionales (duración, equipos)</summary>
+      <div class="row">
+        <label>Duración (minutos)</label>
+        <input type="number" id="duracion" placeholder="60">
+      </div>
+      <div class="row row-2">
+        <div>
+          <label>Equipo A</label>
+          <input type="text" id="equipoA" placeholder="Opcional">
+        </div>
+        <div>
+          <label>Equipo B</label>
+          <input type="text" id="equipoB" placeholder="Opcional">
+        </div>
+      </div>
+    </details>
 
     <div class="dropzone" id="dropzone">
       Arrastrá el video acá o tocá para elegir el archivo
@@ -107,14 +149,18 @@
 <script>
   // Cambiá esta contraseña por la que quieras usar
   const ADMIN_PASSWORD = "camaras2026";
+  let adminPasswordValue = "";
 
   let selectedFile = null;
 
   function checkPass() {
     const val = document.getElementById('pass').value;
     if (val === ADMIN_PASSWORD) {
+      adminPasswordValue = val;
       document.getElementById('gate').classList.add('hidden');
       document.getElementById('panel').classList.remove('hidden');
+      const hoy = new Date().toISOString().slice(0,10);
+      document.getElementById('fecha').value = hoy;
     } else {
       alert('Contraseña incorrecta');
     }
@@ -148,23 +194,47 @@
   }
 
   async function startUpload() {
-    const codigo = document.getElementById('codigo').value.trim();
+    const complejo = document.getElementById('complejo').value.trim();
+    const cancha = document.getElementById('cancha').value.trim();
+    const fecha = document.getElementById('fecha').value;
+    const horaInicio = document.getElementById('horaInicio').value;
+    const duracion = document.getElementById('duracion').value;
+    const equipoA = document.getElementById('equipoA').value.trim();
+    const equipoB = document.getElementById('equipoB').value.trim();
+
     const statusText = document.getElementById('statusText');
     const uploadBtn = document.getElementById('uploadBtn');
     const progressWrap = document.getElementById('progressWrap');
     const progressBar = document.getElementById('progressBar');
 
-    if (!codigo) { alert('Poné el código de acceso del partido'); return; }
+    if (!complejo || !cancha || !fecha || !horaInicio) { alert('Completá complejo, cancha, fecha y hora'); return; }
     if (!selectedFile) { alert('Elegí un video primero'); return; }
 
     uploadBtn.disabled = true;
-    statusText.textContent = 'Preparando subida...';
+    statusText.textContent = 'Buscando/creando el partido...';
 
     try {
-      const ext = selectedFile.name.split('.').pop() || 'mp4';
-      const filename = `${codigo}-${Date.now()}.${ext}`;
+      // 1. Buscar o crear el partido (complejo, cancha, fecha y hora)
+      const upsertResp = await fetch('/api/upsert-partido', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminPassword: adminPasswordValue,
+          complejo, cancha, fecha, horaInicio,
+          duracionMinutos: duracion ? parseInt(duracion, 10) : null,
+          equipoA: equipoA || null, equipoB: equipoB || null,
+        }),
+      });
+      const upsertData = await upsertResp.json();
+      if (!upsertResp.ok) throw new Error(upsertData.error || 'Error buscando/creando el partido');
 
-      // 1. Pedir URL firmada
+      const { partidoId, codigoAcceso } = upsertData;
+      statusText.textContent = `Partido identificado (código ${codigoAcceso}). Preparando subida...`;
+
+      const ext = selectedFile.name.split('.').pop() || 'mp4';
+      const filename = `${codigoAcceso}-${Date.now()}.${ext}`;
+
+      // 2. Pedir URL firmada
       const presignResp = await fetch('/api/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -173,7 +243,7 @@
       const presignData = await presignResp.json();
       if (!presignResp.ok) throw new Error(presignData.error || 'Error generando URL de subida');
 
-      // 2. Subir directo a R2 con barra de progreso
+      // 3. Subir directo a R2 con barra de progreso
       progressWrap.style.display = 'block';
       statusText.textContent = 'Subiendo video...';
 
@@ -196,17 +266,17 @@
         xhr.send(selectedFile);
       });
 
-      // 3. Confirmar en Supabase
+      // 4. Confirmar en Supabase
       statusText.textContent = 'Actualizando partido en Supabase...';
       const confirmResp = await fetch('/api/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigoAcceso: codigo, filename }),
+        body: JSON.stringify({ adminPassword: adminPasswordValue, partidoId, filename }),
       });
       const confirmData = await confirmResp.json();
       if (!confirmResp.ok) throw new Error(confirmData.error || 'Error actualizando Supabase');
 
-      statusText.textContent = '✅ Listo! Video subido y vinculado al partido ' + codigo;
+      statusText.textContent = `✅ Listo! Video subido y vinculado a ${complejo} - ${cancha}, ${fecha} ${horaInicio} (código ${codigoAcceso}). Ya se puede buscar en la página.`;
       progressBar.style.width = '100%';
     } catch (err) {
       statusText.textContent = '❌ ' + err.message;
