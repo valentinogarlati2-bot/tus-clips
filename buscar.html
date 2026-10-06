@@ -111,7 +111,17 @@ select:focus, input:focus{outline:none;border-color:var(--green-light);}
       </div>
       <div class="field">
         <label>Hora</label>
-        <input type="time" id="inpHora">
+        <div class="row-2" style="gap:8px;">
+          <select id="selHora">
+            <option value="">Hora</option>
+          </select>
+          <select id="selMin">
+            <option value="00">:00</option>
+            <option value="15">:15</option>
+            <option value="30">:30</option>
+            <option value="45">:45</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -141,7 +151,12 @@ select:focus, input:focus{outline:none;border-color:var(--green-light);}
   const selComplejo = document.getElementById('selComplejo');
   const selCancha = document.getElementById('selCancha');
   const inpFecha = document.getElementById('inpFecha');
-  const inpHora = document.getElementById('inpHora');
+  const selHora = document.getElementById('selHora');
+  const selMin = document.getElementById('selMin');
+  for(let h = 0; h < 24; h++){
+    const hh = String(h).padStart(2,'0');
+    selHora.insertAdjacentHTML('beforeend', `<option value="${hh}">${hh} hs</option>`);
+  }
   const btn = document.getElementById('btnBuscar');
   const err = document.getElementById('errBox');
   const results = document.getElementById('results');
@@ -208,7 +223,7 @@ select:focus, input:focus{outline:none;border-color:var(--green-light);}
       p_complejo_id: complejoId,
       p_cancha_id: selCancha.value || null,
       p_fecha: inpFecha.value || null,
-      p_hora: inpHora.value || null,
+      p_hora: selHora.value ? (selHora.value + ':' + selMin.value) : null,
     });
 
     btn.disabled = false;
