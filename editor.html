@@ -260,6 +260,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
 .share-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px;}
 .share-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:11px;border:1.5px solid var(--gray-line);font-size:13px;font-weight:600;transition:.2s;}
 .share-btn:hover{border-color:var(--green-light);background:var(--green-pale);}
+.dl-full{width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;border:1.5px solid var(--gray-line);background:var(--white);font-family:inherit;font-size:14px;font-weight:600;color:var(--green-dark);cursor:pointer;transition:.2s;}
+.dl-full:hover{border-color:var(--green-light);background:var(--green-pale);}
+.dl-full:disabled{opacity:.6;cursor:default;}
+.dl-full svg{width:17px;height:17px;flex-shrink:0;}
 .share-btn svg{width:15px;height:15px;flex-shrink:0;}
 
 #toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:300;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 16px;}
@@ -287,7 +291,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
 <body>
 
 <div class="topbar">
-  <a class="back-link" href="index.html">
+  <a class="back-link" href="/">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Volver
   </a>
@@ -375,6 +379,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
           </div>
         </div>
       </div>
+
+      <button class="dl-full" id="dlFullBtn" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14"/></svg>
+        <span id="dlFullLabel">Descargar partido completo</span>
+      </button>
     </div>
   </div>
 
@@ -440,7 +449,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
           <button onclick="agregarJugador('B')">+</button>
         </div>
       </div>
-      <a href="jugadores.html" class="ranking-link" id="rankingLink">Ver ranking de goleadores y ganadores →</a>
+      <a href="/jugadores" class="ranking-link" id="rankingLink">Ver ranking de goleadores y ganadores →</a>
     </div>
 
     <div class="panel-card">
@@ -1399,10 +1408,11 @@ async function intentarWebShare(clip){
       destacado: p.jugador_destacado || ''
     };
     renderInfoView();
+    mostrarBotonDescarga(p);
     cargarJugadoresPartido();
     refreshGroupStatus();
     const rl = document.getElementById('rankingLink');
-    if(rl) rl.href = 'jugadores.html?codigo=' + encodeURIComponent(codigo);
+    if(rl) rl.href = '/jugadores?codigo=' + encodeURIComponent(codigo);
 
     if(banner){
       banner.style.display='flex'; banner.style.background='#E4F3E9'; banner.style.color='#0F3D24';
@@ -1410,6 +1420,37 @@ async function intentarWebShare(clip){
       setTimeout(()=>{ banner.style.display='none'; }, 5000);
     }
   }
+  /* ---------- descargar el partido completo ---------- */
+  function mostrarBotonDescarga(p){
+    const btn = document.getElementById('dlFullBtn');
+    if(!btn || !p.video_url) return;
+    btn.style.display = 'flex';
+    btn.onclick = async () => {
+      const label = document.getElementById('dlFullLabel');
+      btn.disabled = true;
+      label.textContent = 'Preparando descarga…';
+      try {
+        const slug = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();
+        const nombre = ['tusclips', slug(p.complejo_nombre), slug(p.cancha_nombre), p.fecha, (p.hora_inicio||'').slice(0,5).replace(':','')].filter(Boolean).join('_') + '.mp4';
+        const resp = await fetch('/api/descargar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: p.video_url, filename: nombre })
+        });
+        const data = await resp.json();
+        if(!resp.ok) throw new Error(data.error || 'No se pudo preparar la descarga');
+        window.location.href = data.url;
+        toast('Empezó la descarga. Puede tardar según tu conexión.');
+      } catch(e){
+        console.error(e);
+        toast('No se pudo descargar el partido. Probá de nuevo.');
+      } finally {
+        btn.disabled = false;
+        label.textContent = 'Descargar partido completo';
+      }
+    };
+  }
+
   /* ---------- cargar partido real por id (desde el buscador) ---------- */
   async function cargarPartidoPorId(id){
     const banner = document.getElementById('codigoBanner');
