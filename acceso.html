@@ -55,7 +55,7 @@ p.lead{color:var(--gray-mid);font-size:14.5px;line-height:1.55;margin-bottom:32p
 <body>
 
 <div class="box">
-  <a href="index.html" class="brand">
+  <a href="/" class="brand">
     <svg viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke="currentColor" stroke-width="2.4"/><path d="M15 13L15 27L27 20Z" fill="currentColor"/></svg>
     tus<span style="color:#4CAF6D">clips</span>
   </a>
@@ -70,7 +70,7 @@ p.lead{color:var(--gray-mid);font-size:14.5px;line-height:1.55;margin-bottom:32p
   <div class="err" id="errBox"></div>
 
   <p class="help">¿No tenés código todavía? Pedíselo al encargado de la cancha donde jugaste.</p>
-  <a href="index.html" class="back-link">
+  <a href="/" class="back-link">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
     Volver al inicio
   </a>
@@ -109,7 +109,7 @@ p.lead{color:var(--gray-mid);font-size:14.5px;line-height:1.55;margin-bottom:32p
       return;
     }
 
-    window.location.href = 'editor.html?codigo=' + encodeURIComponent(codigo);
+    window.location.href = '/editor?codigo=' + encodeURIComponent(codigo);
   }
 
   btn.addEventListener('click', buscar);
