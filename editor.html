@@ -260,6 +260,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
 .share-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px;}
 .share-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:11px;border:1.5px solid var(--gray-line);font-size:13px;font-weight:600;transition:.2s;}
 .share-btn:hover{border-color:var(--green-light);background:var(--green-pale);}
+.player-expired{position:absolute;inset:0;z-index:30;background:#0d1210;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:24px;}
+.player-expired strong{font-size:18px;font-weight:700;}
+.player-expired span{font-size:14px;color:rgba(255,255,255,.75);}
+.player-expired a{margin-top:10px;background:var(--green-light);color:#0A2A19;font-weight:600;font-size:14px;padding:11px 22px;border-radius:11px;}
 .dl-full{width:100%;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;border:1.5px solid var(--gray-line);background:var(--white);font-family:inherit;font-size:14px;font-weight:600;color:var(--green-dark);cursor:pointer;transition:.2s;}
 .dl-full:hover{border-color:var(--green-light);background:var(--green-pale);}
 .dl-full:disabled{opacity:.6;cursor:default;}
@@ -401,6 +405,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;heigh
         <div class="info-row"><span>Equipos</span><span id="infoEquipos">Azules vs Rojos</span></div>
         <div class="info-row"><span>Marcador</span><span class="score" id="infoMarcador">5 – 4</span></div>
         <div class="info-row"><span>Destacado</span><span id="infoDestacado">Juan Pérez</span></div>
+        <div class="info-row"><span>Disponible hasta</span><span id="infoVence">—</span></div>
       </div>
       <div id="infoEditMode" style="display:none;">
         <div class="field"><label>Complejo</label><input id="editComplejo" type="text"></div>
@@ -1383,6 +1388,41 @@ async function intentarWebShare(clip){
   /* ---------- cargar partido real por código ---------- */
   function fmtHora(h){ return h.slice(0,5); }
 
+  /* Los partidos duran 7 días (el video se borra solo de la nube pasado ese plazo) */
+  const DIAS_DISPONIBLE = 7;
+  function inicioPartido(p){
+    return new Date(p.fecha + 'T' + (p.hora_inicio || '00:00:00').slice(0,8) + '-03:00');
+  }
+  function partidoVencido(p){
+    if(!p || !p.fecha) return false;
+    return (Date.now() - inicioPartido(p).getTime()) > DIAS_DISPONIBLE*24*3600*1000;
+  }
+  function fechaVencimientoISO(p){
+    const d = new Date(p.fecha + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + DIAS_DISPONIBLE);
+    return d.toISOString().slice(0,10);
+  }
+  function mostrarVencido(p){
+    const banner = document.getElementById('codigoBanner');
+    if(banner){
+      banner.style.display='flex'; banner.style.background='#FCEBEA'; banner.style.color='#c2453c';
+      banner.textContent='Este partido ya venció (los partidos duran '+DIAS_DISPONIBLE+' días).';
+    }
+    partidoState = Object.assign({}, partidoState, {
+      complejo: p.complejo_nombre || '—', cancha: p.cancha_nombre || '—',
+      fecha: p.fecha || partidoState.fecha, hora: p.hora_inicio ? fmtHora(p.hora_inicio) : partidoState.hora
+    });
+    renderInfoView();
+    const wrap = document.getElementById('playerWrap');
+    if(wrap && !wrap.querySelector('.player-expired')){
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="player-expired"><strong>Este partido ya venció</strong>' +
+        '<span>Los partidos están disponibles durante '+DIAS_DISPONIBLE+' días.</span>' +
+        '<a href="/buscar">Buscar otro partido</a></div>');
+    }
+    const dl = document.getElementById('dlFullBtn'); if(dl) dl.style.display='none';
+  }
+
   async function cargarPartidoPorCodigo(codigo){
     const banner = document.getElementById('codigoBanner');
     const { data, error } = await supabase.rpc('buscar_partido_por_codigo', { codigo });
@@ -1392,6 +1432,7 @@ async function intentarWebShare(clip){
     }
     const p = data[0];
     currentCodigo = codigo;
+    if(partidoVencido(p)){ mostrarVencido(p); return; }
 
     if(p.video_url){
       currentVideoUrl = p.video_url;
@@ -1408,6 +1449,8 @@ async function intentarWebShare(clip){
       destacado: p.jugador_destacado || ''
     };
     renderInfoView();
+    const iv = document.getElementById('infoVence');
+    if(iv && p.fecha) iv.textContent = fmtFecha(fechaVencimientoISO(p));
     mostrarBotonDescarga(p);
     cargarJugadoresPartido();
     refreshGroupStatus();
@@ -1460,6 +1503,7 @@ async function intentarWebShare(clip){
       return;
     }
     const p = data[0];
+    if(partidoVencido(p)){ mostrarVencido(p); return; }
     if(p.codigo_acceso) cargarPartidoPorCodigo(p.codigo_acceso);
   }
 
